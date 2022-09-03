@@ -4,19 +4,25 @@ import { NestFactory } from '@nestjs/core'
 
 import { AppModule } from './app.module'
 import { IConfiguration } from './config/config'
+import { PrismaService } from './prisma.service'
 
 async function bootstrap() {
+  const logger = new Logger('NestApplication')
   const app = await NestFactory.create(AppModule)
   await app.init()
 
-  // Get variables from
+  // Get services
+  const prismaService = app.get(PrismaService)
   const configService = app.get<ConfigService<IConfiguration>>(ConfigService)
+
+  // Get variables from appConfig
   const appConfig = configService.get<IConfiguration['app']>('app')
   const { port, globalPrefix } = appConfig
 
+  // Setting
   app.setGlobalPrefix(globalPrefix)
+  await prismaService.enableShutdownHooks(app)
 
-  const logger = new Logger('NestApplication')
   await app.listen(port)
   logger.log(`🚀 Application is running on: http://localhost:${port}/${globalPrefix}`)
 }
