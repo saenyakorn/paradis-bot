@@ -12,30 +12,27 @@ datasource db {
 
 /// The Discord server collection
 model Guild {
-  id      String    @id
-  ownerId String
-  User    User[]
-  Project Project[]
-  Epic    Epic[]
-  Task    Task[]
+  id       String    @id
+  Projects Project[]
+  Epics    Epic[]
+  Tasks    Task[]
+  Users    User[]
 }
 
 /// The users for each Discord server
 model User {
   /// Discord user ID
-  id          String        @id
-  /// Discord user name 
-  name        String
-  /// Discord user email
-  email       String
+  id           String        @id
+  /// User email for sending notification
+  email        String?
+  /// Github username
+  github       String?
   /// The project the user is working on
-  UserProject UserProject[]
-  UserEpic    UserEpic[]
-  UserTask    UserTask[]
-  History     History[]
-
-  guildId String
-  guild   Guild  @relation(fields: [guildId], references: [id])
+  Guilds       Guild[]
+  UserProjects UserProject[]
+  UserEpics    UserEpic[]
+  UserTasks    UserTask[]
+  Histories    History[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -43,68 +40,74 @@ model User {
 
 model Project {
   /// auto-incrementing project id
-  id          Int           @id @default(autoincrement())
+  id           String        @id @default(cuid())
   /// The name of the project 
-  name        String
+  name         String
   /// The description of the project
-  description String?
+  description  String?
   /// The epic the project is part of
-  Epic        Epic[]
+  Epic         Epic[]
   /// The user working on the project
-  UserProject UserProject[]
+  UserProjects UserProject[]
 
   guildId String
-  guild   Guild  @relation(fields: [guildId], references: [id])
+  Guild   Guild  @relation(fields: [guildId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([id, guildId])
 }
 
 model Epic {
   /// auto-incrementing epic id
-  id          Int        @id @default(autoincrement())
+  id          String     @id @default(cuid())
   /// The name of the epic
   name        String
   /// The description of the epic
   description String?
-  Task        Task[]
-  UserEpic    UserEpic[]
+  Tasks       Task[]
+  UserEpics   UserEpic[]
 
-  projectId Int
-  project   Project @relation(fields: [projectId], references: [id])
+  projectId String
+  Project   Project @relation(fields: [projectId], references: [id])
 
   guildId String
-  guild   Guild  @relation(fields: [guildId], references: [id])
+  Guild   Guild  @relation(fields: [guildId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([id, projectId, guildId])
 }
 
 model Task {
   /// auto-incrementing task id
-  id       Int        @id @default(autoincrement())
+  id        Int        @id @default(autoincrement())
   /// The name of the task
-  link     String
-  UserTask UserTask[]
+  link      String
+  UserTasks UserTask[]
 
-  epicId Int
-  Epic   Epic? @relation(fields: [epicId], references: [id])
+  Epic   Epic   @relation(fields: [epicId], references: [id])
+  epicId String
 
   guildId String
-  guild   Guild  @relation(fields: [guildId], references: [id])
+  Guild   Guild  @relation(fields: [guildId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([id, epicId, guildId])
 }
 
 model UserProject {
   notifiable Boolean @default(true)
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  User   User   @relation(fields: [userId], references: [id])
 
-  projectId Int
-  project   Project @relation(fields: [projectId], references: [id])
+  projectId String
+  Project   Project @relation(fields: [projectId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -116,10 +119,10 @@ model UserEpic {
   notifiable Boolean @default(true)
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  User   User   @relation(fields: [userId], references: [id])
 
-  epicId Int
-  epic   Epic @relation(fields: [epicId], references: [id])
+  epicId String
+  Epic   Epic   @relation(fields: [epicId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -131,10 +134,10 @@ model UserTask {
   notifiable Boolean @default(true)
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  User   User   @relation(fields: [userId], references: [id])
 
   taskId Int
-  task   Task @relation(fields: [taskId], references: [id])
+  Task   Task @relation(fields: [taskId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -143,7 +146,7 @@ model UserTask {
 }
 
 model History {
-  id      Int    @id @default(autoincrement())
+  id      String @id @default(cuid())
   command String
 
   userId String

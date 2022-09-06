@@ -1,7 +1,6 @@
 -- CreateTable
 CREATE TABLE "Guild" (
     "id" TEXT NOT NULL,
-    "ownerId" TEXT NOT NULL,
 
     CONSTRAINT "Guild_pkey" PRIMARY KEY ("id")
 );
@@ -9,9 +8,8 @@ CREATE TABLE "Guild" (
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
-    "guildId" TEXT NOT NULL,
+    "email" TEXT,
+    "github" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -20,7 +18,7 @@ CREATE TABLE "User" (
 
 -- CreateTable
 CREATE TABLE "Project" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
     "guildId" TEXT NOT NULL,
@@ -32,10 +30,10 @@ CREATE TABLE "Project" (
 
 -- CreateTable
 CREATE TABLE "Epic" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
-    "projectId" INTEGER NOT NULL,
+    "projectId" TEXT NOT NULL,
     "guildId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -47,7 +45,7 @@ CREATE TABLE "Epic" (
 CREATE TABLE "Task" (
     "id" SERIAL NOT NULL,
     "link" TEXT NOT NULL,
-    "epicId" INTEGER NOT NULL,
+    "epicId" TEXT NOT NULL,
     "guildId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -59,7 +57,7 @@ CREATE TABLE "Task" (
 CREATE TABLE "UserProject" (
     "notifiable" BOOLEAN NOT NULL DEFAULT true,
     "userId" TEXT NOT NULL,
-    "projectId" INTEGER NOT NULL,
+    "projectId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -70,7 +68,7 @@ CREATE TABLE "UserProject" (
 CREATE TABLE "UserEpic" (
     "notifiable" BOOLEAN NOT NULL DEFAULT true,
     "userId" TEXT NOT NULL,
-    "epicId" INTEGER NOT NULL,
+    "epicId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -90,7 +88,7 @@ CREATE TABLE "UserTask" (
 
 -- CreateTable
 CREATE TABLE "History" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "command" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -98,8 +96,26 @@ CREATE TABLE "History" (
     CONSTRAINT "History_pkey" PRIMARY KEY ("id")
 );
 
--- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_guildId_fkey" FOREIGN KEY ("guildId") REFERENCES "Guild"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+-- CreateTable
+CREATE TABLE "_GuildToUser" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Project_id_guildId_key" ON "Project"("id", "guildId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Epic_id_projectId_guildId_key" ON "Epic"("id", "projectId", "guildId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Task_id_epicId_guildId_key" ON "Task"("id", "epicId", "guildId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_GuildToUser_AB_unique" ON "_GuildToUser"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_GuildToUser_B_index" ON "_GuildToUser"("B");
 
 -- AddForeignKey
 ALTER TABLE "Project" ADD CONSTRAINT "Project_guildId_fkey" FOREIGN KEY ("guildId") REFERENCES "Guild"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -136,3 +152,9 @@ ALTER TABLE "UserTask" ADD CONSTRAINT "UserTask_taskId_fkey" FOREIGN KEY ("taskI
 
 -- AddForeignKey
 ALTER TABLE "History" ADD CONSTRAINT "History_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_GuildToUser" ADD CONSTRAINT "_GuildToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "Guild"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_GuildToUser" ADD CONSTRAINT "_GuildToUser_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
