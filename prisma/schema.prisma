@@ -9,3 +9,145 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+/// The Discord server collection
+model Guild {
+  id      String    @id
+  ownerId String
+  User    User[]
+  Project Project[]
+  Epic    Epic[]
+  Task    Task[]
+}
+
+/// The users for each Discord server
+model User {
+  /// Discord user ID
+  id          String        @id
+  /// Discord user name 
+  name        String
+  /// Discord user email
+  email       String
+  /// The project the user is working on
+  UserProject UserProject[]
+  UserEpic    UserEpic[]
+  UserTask    UserTask[]
+  History     History[]
+
+  guildId String
+  guild   Guild  @relation(fields: [guildId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Project {
+  /// auto-incrementing project id
+  id          Int           @id @default(autoincrement())
+  /// The name of the project 
+  name        String
+  /// The description of the project
+  description String?
+  /// The epic the project is part of
+  Epic        Epic[]
+  /// The user working on the project
+  UserProject UserProject[]
+
+  guildId String
+  guild   Guild  @relation(fields: [guildId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Epic {
+  /// auto-incrementing epic id
+  id          Int        @id @default(autoincrement())
+  /// The name of the epic
+  name        String
+  /// The description of the epic
+  description String?
+  Task        Task[]
+  UserEpic    UserEpic[]
+
+  projectId Int
+  project   Project @relation(fields: [projectId], references: [id])
+
+  guildId String
+  guild   Guild  @relation(fields: [guildId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Task {
+  /// auto-incrementing task id
+  id       Int        @id @default(autoincrement())
+  /// The name of the task
+  link     String
+  UserTask UserTask[]
+
+  epicId Int
+  Epic   Epic? @relation(fields: [epicId], references: [id])
+
+  guildId String
+  guild   Guild  @relation(fields: [guildId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model UserProject {
+  notifiable Boolean @default(true)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  projectId Int
+  project   Project @relation(fields: [projectId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@id([userId, projectId])
+}
+
+model UserEpic {
+  notifiable Boolean @default(true)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  epicId Int
+  epic   Epic @relation(fields: [epicId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@id([userId, epicId])
+}
+
+model UserTask {
+  notifiable Boolean @default(true)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  taskId Int
+  task   Task @relation(fields: [taskId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@id([userId, taskId])
+}
+
+model History {
+  id      Int    @id @default(autoincrement())
+  command String
+
+  userId String
+  User   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+}

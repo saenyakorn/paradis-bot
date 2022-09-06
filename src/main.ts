@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
 
 import { AppModule } from './app.module'
-import { IConfiguration } from './config/config'
-import { PrismaService } from './prisma.service'
+import { IConfiguration } from './config/configuration'
+import { PrismaService } from './prisma/prisma.service'
 
 async function bootstrap() {
   const logger = new Logger('NestApplication')
