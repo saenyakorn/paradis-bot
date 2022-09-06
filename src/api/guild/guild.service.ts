@@ -40,4 +40,56 @@ export class GuildService {
     this.logger.log(`Guild ${guild.id} uninstalled`)
     return guild.id
   }
+
+  /**
+   * Get all projects in the given guild
+   * @param guildId
+   * @returns
+   */
+  async getProjects(guildId: string) {
+    const { Projects } = await this.prisma.guild.findUnique({
+      include: { Projects: true },
+      where: { id: guildId },
+    })
+    return Projects
+  }
+
+  /**
+   * Get all epics in the given guild
+   * @param guildId
+   * @returns
+   */
+  async getEpics(guildId: string) {
+    const { Epics } = await this.prisma.guild.findUnique({
+      include: { Epics: true },
+      where: { id: guildId },
+    })
+    return Epics
+  }
+
+  /**
+   * Get all users in the given guild
+   * @param guildId
+   * @returns
+   */
+  async getUsers(guildId: string) {
+    const { Users } = await this.prisma.guild.findUnique({
+      include: { Users: true },
+      where: { id: guildId },
+    })
+    return Users
+  }
+
+  /**
+   * Get all tasks in the given guild
+   * @param guildId
+   * @returns
+   */
+  async getTasks(guildId: string) {
+    const { Tasks } = await this.prisma.guild.findUnique({
+      include: { Tasks: true },
+      where: { id: guildId },
+    })
+    return Tasks
+  }
 }
