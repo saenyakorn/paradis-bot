@@ -10,147 +10,36 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// The Discord server collection
 model Guild {
-  id       String    @id
-  Projects Project[]
-  Epics    Epic[]
-  Tasks    Task[]
-  Users    User[]
+  id                String              @id
+  NotificationPause NotificationPause[]
+  PublicChannel     PublicChannel[]
 }
 
-/// The users for each Discord server
 model User {
-  /// Discord user ID
-  id           String        @id
-  /// User email for sending notification
-  email        String?
-  /// Github username
-  github       String?
-  /// The project the user is working on
-  Guilds       Guild[]
-  UserProjects UserProject[]
-  UserEpics    UserEpic[]
-  UserTasks    UserTask[]
-  Histories    History[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  id                String              @id
+  NotificationPause NotificationPause[]
 }
 
-model Project {
-  /// auto-incrementing project id
-  id           String        @id @default(cuid())
-  /// The name of the project 
-  name         String
-  /// The description of the project
-  description  String?
-  /// The epic the project is part of
-  Epic         Epic[]
-  /// The user working on the project
-  UserProjects UserProject[]
+model PublicChannel {
+  channelId String
 
   guildId String
-  Guild   Guild  @relation(fields: [guildId], references: [id])
+  guild   Guild  @relation(fields: [guildId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  number Int
 
-  @@unique([id, guildId])
+  @@id([channelId, guildId])
 }
 
-model Epic {
-  /// auto-incrementing epic id
-  id          String     @id @default(cuid())
-  /// The name of the epic
-  name        String
-  /// The description of the epic
-  description String?
-  Tasks       Task[]
-  UserEpics   UserEpic[]
-
-  projectId String
-  Project   Project @relation(fields: [projectId], references: [id])
+model NotificationPause {
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
   guildId String
-  Guild   Guild  @relation(fields: [guildId], references: [id])
+  guild   Guild  @relation(fields: [guildId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  pause DateTime
 
-  @@unique([id, projectId, guildId])
-}
-
-model Task {
-  /// auto-incrementing task id
-  id        Int        @id @default(autoincrement())
-  /// The name of the task
-  link      String
-  UserTasks UserTask[]
-
-  Epic   Epic   @relation(fields: [epicId], references: [id])
-  epicId String
-
-  guildId String
-  Guild   Guild  @relation(fields: [guildId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@unique([id, epicId, guildId])
-}
-
-model UserProject {
-  notifiable Boolean @default(true)
-
-  userId String
-  User   User   @relation(fields: [userId], references: [id])
-
-  projectId String
-  Project   Project @relation(fields: [projectId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@id([userId, projectId])
-}
-
-model UserEpic {
-  notifiable Boolean @default(true)
-
-  userId String
-  User   User   @relation(fields: [userId], references: [id])
-
-  epicId String
-  Epic   Epic   @relation(fields: [epicId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@id([userId, epicId])
-}
-
-model UserTask {
-  notifiable Boolean @default(true)
-
-  userId String
-  User   User   @relation(fields: [userId], references: [id])
-
-  taskId Int
-  Task   Task @relation(fields: [taskId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@id([userId, taskId])
-}
-
-model History {
-  id      String @id @default(cuid())
-  command String
-
-  userId String
-  User   User   @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now())
+  @@id([userId, guildId])
 }

@@ -4,11 +4,12 @@ import { Command, DiscordCommand } from '@discord-nestjs/core'
 import { InteractionReplyOptions } from 'discord.js'
 
 @Command({
-  name: 'setup',
-  description: 'Pong!',
+  name: 'channel',
+  description: 'User registration',
+  include: [BaseInfoSubCommand],
 })
 @Injectable()
-export class SetupCommand implements DiscordCommand {
+export class ChannelCommand implements DiscordCommand {
   handler(): InteractionReplyOptions {
     return {
       content: 'Pong!',

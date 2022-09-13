@@ -3,12 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 
 import { DiscordModule } from '@discord-nestjs/core'
 
-import { EpicModule } from './api/epic/epic.module'
-import { GuildModule } from './api/guild/guild.module'
-import { GuildService } from './api/guild/guild.service'
-import { ProjectModule } from './api/project/project.module'
-import { TaskModule } from './api/task/task.module'
-import { UserModule } from './api/user/user.module'
+import { ChannelModule } from './api/channel/channel.module'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { configuration } from './config/configuration'
@@ -30,14 +25,10 @@ import { PrismaModule } from './prisma/prisma.module'
     }),
     BotSlashCommands,
     PrismaModule,
-    GuildModule,
-    TaskModule,
-    EpicModule,
-    UserModule,
-    ProjectModule,
+    ChannelModule,
   ],
   controllers: [AppController],
-  providers: [AppService, GuildService],
+  providers: [AppService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

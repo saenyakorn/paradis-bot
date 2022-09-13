@@ -1,73 +1,53 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Paradis Bot <!-- omit in toc -->
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Slack-like Discord bot for collaborative working
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+# Table of Contents <!-- omit in toc -->
 
-## Description
+- [Features](#features)
+  - [Channel Management](#channel-management)
+  - [Basic Commands](#basic-commands)
+  - [Available Commands for Public Channel](#available-commands-for-public-channel)
+  - [Available Commands for Private Channel](#available-commands-for-private-channel)
+  - [Available Commands for Voice Channel](#available-commands-for-voice-channel)
+    - [Notification Management](#notification-management)
+- [Plan](#plan)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+# Features
 
-## Installation
+## Channel Management
 
-```bash
-$ npm install
-```
+Normally, everyone in the Discord server would not be able to see any channel that is created by the bot. User need to list the available public channel and join desired channels by themselves.
 
-## Running the app
+## Basic Commands
 
-```bash
-# development
-$ npm run start
+- [x] `/channel invite <user|role>` - Invite a user or a role to the channel. The invited user would able to read and write messages in the channel, the default notification is `All messages`
+- [x] `/channel leave <channel>` - Leave the channel you are in
+- [x] `/channel kick <channel> <user>` - Kick the user from the channel. The users would not be able to read or write messages in the channel anymore
+- [x] `/channel archive <channel>` - Archive the channel, the users in the channel are only able to read the messages
+- [ ] `/channel delete <channel>` - Delete the channel
 
-# watch mode
-$ npm run start:dev
+## Available Commands for Public Channel
 
-# production mode
-$ npm run start:prod
-```
+- [x] `/channel-public create <channel-name> <category-name>?` - Create a public channel
+- [x] `/channel-public seek <channel>` - Join into the channel with read-only mode, the default notification is `Only @mention`
+- [x] `/channel-public join <channel>` - Join into the channel with read-write mode, the default notification is `All messages`
+- [x] `/channel-public list` - List all available public channels
 
-## Test
+## Available Commands for Private Channel
 
-```bash
-# unit tests
-$ npm run test
+- [x] `/channel-private create <channel-name> <category-name>?` - Create a private channel
 
-# e2e tests
-$ npm run test:e2e
+## Available Commands for Voice Channel
 
-# test coverage
-$ npm run test:cov
-```
+- [x] `/channel voice setup <channel-name> <category-name>?` - Setup a voice channel. When the user enter this voice channel, the bot will create another temporary voice channel and move the user into the new channel. The bot will delete the channel when the all users leave the temporary channel
 
-## Support
+### Notification Management
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+- [ ] `/noti list` - List all notification setting for every channel you are in
+- [ ] `/noti set <channel> <notification>` - Set the notification for the given channel
+- [ ] `/noti pause <date|time>` - Pause the notification util the given time, users will not receive any notification during the pause time
 
-## Stay in touch
+# Plan
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+TODO
