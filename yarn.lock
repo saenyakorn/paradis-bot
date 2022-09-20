@@ -417,10 +417,19 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@discord-nestjs/core@^4.2.1":
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/@discord-nestjs/core/-/core-4.2.1.tgz#bde4e329f2114160e2987be6eb66a7fd9f9ca03f"
-  integrity sha512-VAj0BY4fM+Nznn8/2VorqsDbJizYD6n0k08oKfUiqK4VtmjnRBlrzBgd45U82wzfKFwAzQ+fLV0QuCMhr5vN7g==
+"@discord-nestjs/common@^4.0.7":
+  version "4.0.7"
+  resolved "https://registry.yarnpkg.com/@discord-nestjs/common/-/common-4.0.7.tgz#a7b75958df5b903cb1f525699485c1fa9616bf02"
+  integrity sha512-ee5uBhlvFW599KbxjU+91HcOpeHY6jvPhKKz2dPpauUmDFCG24PBE5Tm8PYcgObodjCjbFKGoQBjXjom85AtkQ==
+  dependencies:
+    "@nestjs/mapped-types" "1.1.0"
+    class-transformer "0.5.1"
+    class-validator "0.13.2"
+
+"@discord-nestjs/core@^4.3.0":
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/@discord-nestjs/core/-/core-4.3.0.tgz#43aeee5a1750fde754cea29596f6601ddd935b5d"
+  integrity sha512-+tH7GlWhUu9/nQo6ua3mkhDuSAQz3hNtvl4Il+7uN0JUT4DrILW5Plxgglmsrm2AONff2HvAiyoJTO13IHW6fg==
   dependencies:
     class-transformer "0.5.1"
 
@@ -816,6 +825,11 @@
     path-to-regexp "3.2.0"
     tslib "2.4.0"
     uuid "8.3.2"
+
+"@nestjs/mapped-types@1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@nestjs/mapped-types/-/mapped-types-1.1.0.tgz#54a9fa61079635dd6c3c75fd9593f20b2302a55b"
+  integrity sha512-+2kSly4P1QI+9eGt+/uGyPdEG1hVz7nbpqPHWZVYgoqz8eOHljpXPag+UCVRw9zo2XCu4sgNUIGe8Uk0+OvUQg==
 
 "@nestjs/platform-express@^9.0.0":
   version "9.0.11"
@@ -1875,6 +1889,14 @@ class-transformer@0.5.1:
   version "0.5.1"
   resolved "https://registry.yarnpkg.com/class-transformer/-/class-transformer-0.5.1.tgz#24147d5dffd2a6cea930a3250a677addf96ab336"
   integrity sha512-SQa1Ws6hUbfC98vKGxZH3KFY0Y1lm5Zm0SY8XX9zbK7FJCyVEac3ATW0RIpwzW+oOfmHE5PMPufDG9hCfoEOMw==
+
+class-validator@0.13.2:
+  version "0.13.2"
+  resolved "https://registry.yarnpkg.com/class-validator/-/class-validator-0.13.2.tgz#64b031e9f3f81a1e1dcd04a5d604734608b24143"
+  integrity sha512-yBUcQy07FPlGzUjoLuUfIOXzgynnQPPruyK1Ge2B74k9ROwnle1E+NxLWnUv5OLU8hA/qL5leAE9XnXq3byaBw==
+  dependencies:
+    libphonenumber-js "^1.9.43"
+    validator "^13.7.0"
 
 cli-cursor@^3.1.0:
   version "3.1.0"
@@ -3589,6 +3611,11 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
+libphonenumber-js@^1.9.43:
+  version "1.10.13"
+  resolved "https://registry.yarnpkg.com/libphonenumber-js/-/libphonenumber-js-1.10.13.tgz#0b5833c7fdbf671140530d83531c6753f7e0ea3c"
+  integrity sha512-b74iyWmwb4GprAUPjPkJ11GTC7KX4Pd3onpJfKxYyY8y9Rbb4ERY47LvCMEDM09WD3thiLDMXtkfDK/AX+zT7Q==
+
 lines-and-columns@^1.1.6:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/lines-and-columns/-/lines-and-columns-1.2.4.tgz#eca284f75d2965079309dc0ad9255abb2ebc1632"
@@ -4941,6 +4968,11 @@ v8-to-istanbul@^9.0.1:
     "@jridgewell/trace-mapping" "^0.3.12"
     "@types/istanbul-lib-coverage" "^2.0.1"
     convert-source-map "^1.6.0"
+
+validator@^13.7.0:
+  version "13.7.0"
+  resolved "https://registry.yarnpkg.com/validator/-/validator-13.7.0.tgz#4f9658ba13ba8f3d82ee881d3516489ea85c0857"
+  integrity sha512-nYXQLCBkpJ8X6ltALua9dRrZDHVYxjJ1wgskNt1lH9fzGjs3tgojGSCBjmEPwkWS1y29+DrizMTW19Pr9uB2nw==
 
 vary@^1, vary@~1.1.2:
   version "1.1.2"

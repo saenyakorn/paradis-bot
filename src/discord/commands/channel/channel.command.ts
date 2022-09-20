@@ -1,19 +1,13 @@
 import { Injectable } from '@nestjs/common'
 
-import { Command, DiscordCommand } from '@discord-nestjs/core'
-import { InteractionReplyOptions } from 'discord.js'
+import { Command } from '@discord-nestjs/core'
+
+import { ChannelArchieveSubCommand } from './archive.sub-command'
 
 @Command({
   name: 'channel',
   description: 'User registration',
-  include: [BaseInfoSubCommand],
+  include: [ChannelArchieveSubCommand],
 })
 @Injectable()
-export class ChannelCommand implements DiscordCommand {
-  handler(): InteractionReplyOptions {
-    return {
-      content: 'Pong!',
-      ephemeral: true,
-    }
-  }
-}
+export class ChannelCommand {}

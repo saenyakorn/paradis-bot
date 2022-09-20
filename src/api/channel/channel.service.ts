@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 
 import { PrismaService } from '@app/prisma/prisma.service'
 import { InjectDiscordClient } from '@discord-nestjs/core'
@@ -12,10 +12,12 @@ import {
 } from 'discord.js'
 
 import { MentionService } from '../mention/mention.service'
-import { ChannelVisibility, CreateChannelDTO } from './channel.dto'
+import { ChannelVisibility } from './channel.dto'
 
 @Injectable()
 export class ChannelService {
+  private readonly logger = new Logger(ChannelService.name)
+
   constructor(
     @InjectDiscordClient()
     private readonly client: Client,
@@ -25,16 +27,37 @@ export class ChannelService {
 
   async getGuild(guildId: string) {
     const guild = await this.client.guilds.fetch(guildId)
-    if (!guild) throw new Error('Guild not found')
+    if (!guild) {
+      this.logger.debug(`Guild ${guildId} not found`)
+      throw new Error(`Guild ${guildId}  not found`)
+    }
     return guild
   }
 
   async findTextChannel(guildId: string, channelId: string) {
     const guild = await this.getGuild(guildId)
     const channel = await guild.channels.fetch(channelId, { cache: true })
-    if (!channel) throw new Error('Channel not found')
-    if (channel.type !== ChannelType.GuildText) throw new Error('Channel is not a text channel')
+    if (!channel) {
+      this.logger.debug(`Text channel ${channelId} not found`)
+      throw new Error(`Text channel ${channelId}  not found`)
+    }
+    if (channel.type !== ChannelType.GuildText) {
+      this.logger.debug(`Channel ${channelId} is not a text channel`)
+      throw new Error('Channel is not a text channel')
+    }
     return channel as TextChannel
+  }
+
+  async findTextChannelByNumber(guildId: string, channelNumber: number) {
+    const channel = await this.prisma.publicChannel.findFirst({
+      select: { channelId: true },
+      where: { guildId, number: channelNumber },
+    })
+    if (!channel) {
+      this.logger.debug(`Channel ${channelNumber} not found`)
+      throw new Error(`Channel ${channelNumber} not found`)
+    }
+    return this.findTextChannel(guildId, channel.channelId)
   }
 
   /**
@@ -57,12 +80,11 @@ export class ChannelService {
     })
   }
 
-  async createPublicChannelForDB(guildId: string, channelId: string) {
-    const {
-      _max: { number: maxNumber },
-    } = await this.prisma.publicChannel.aggregate({
+  async _createPublicChannelInDB(guildId: string, channelId: string) {
+    const result = await this.prisma.publicChannel.aggregate({
       _max: { number: true },
     })
+    const maxNumber = result._max?.number + 1 ?? 0
     await this.prisma.publicChannel.create({
       data: { guildId: guildId, channelId: channelId, number: maxNumber },
     })
@@ -74,27 +96,34 @@ export class ChannelService {
    * @param visibility - The channel visibility, public or private
    * @returns
    */
-  async createChannel(dto: CreateChannelDTO, visibility: ChannelVisibility) {
-    const guild = await this.getGuild(dto.guildId)
+  async createChannel(params: {
+    visibility: ChannelVisibility
+    guildId: string
+    channelName: string
+    creatorId: string
+    categoryName?: string
+  }) {
+    const { guildId, channelName, creatorId, categoryName, visibility } = params
+    const guild = await this.getGuild(guildId)
     // Define the visibility of the channel
     const permissions: OverwriteResolvable[] | Collection<string, OverwriteResolvable> = [
       { id: guild.roles.everyone, deny: [PermissionFlagsBits.ViewChannel] },
-      { id: dto.creatorId, allow: [PermissionFlagsBits.ViewChannel] },
+      { id: creatorId, allow: [PermissionFlagsBits.ViewChannel] },
     ]
     // Create text channel
     const channel = await guild.channels.create({
-      name: dto.channelName,
+      name: channelName,
       type: ChannelType.GuildText,
       permissionOverwrites: permissions,
     })
     // Create category if needed
-    if (dto.categoryName) {
-      const category = await this._findOrCreateCategory(dto.guildId, dto.categoryName)
+    if (categoryName) {
+      const category = await this._findOrCreateCategory(guildId, categoryName)
       await channel.setParent(category.id)
     }
     // Store channel id to database if it's public
     if (visibility === ChannelVisibility.Public) {
-      await this.createPublicChannelForDB(dto.guildId, channel.id)
+      await this._createPublicChannelInDB(guildId, channel.id)
     }
     await channel.send(`Welcome to ${channel.name}!`)
     return channel
@@ -162,9 +191,13 @@ export class ChannelService {
    * @param guildId - The guild id
    * @param channelId - The channel id
    */
-  async deleteChannel(guildId: string, channelId: string) {
-    const channel = await this.findTextChannel(guildId, channelId)
-    await channel.delete()
+  async deleteChannel(
+    guildId: string,
+    channelId: string,
+    options?: {
+      deleteInGuild?: boolean
+    }
+  ) {
     await this.prisma.publicChannel.delete({
       where: {
         channelId_guildId: {
@@ -173,6 +206,10 @@ export class ChannelService {
         },
       },
     })
+    if (options?.deleteInGuild) {
+      const channel = await this.findTextChannel(guildId, channelId)
+      await channel.delete()
+    }
   }
 
   /**
@@ -215,16 +252,48 @@ export class ChannelService {
   }
 
   /**
-   * List all available public channels
+   * List all available public channels, delete the ones that are not available anymore
    * @param guildId - The guild id
    * @returns
    */
   async listPublicChannels(guildId: string) {
+    await this._cleanupDatabasePublicChannel(guildId)
+
     const channels = await this.prisma.publicChannel.findMany({
       where: { guildId: guildId },
     })
     const guild = await this.getGuild(guildId)
-    const allChannels = await guild.channels.fetch()
-    return allChannels.filter((channel) => channels.some((c) => c.channelId === channel.id))
+    const guildChannels = await guild.channels.fetch()
+    return channels.map((ch) => {
+      const channelInfo = guildChannels.find((c) => c.id === ch.channelId)
+      return {
+        ...ch,
+        ...channelInfo,
+        parent: channelInfo.parent,
+      }
+    })
+  }
+
+  async _cleanupDatabasePublicChannel(guildId: string) {
+    const dbChannels = await this.prisma.publicChannel.findMany({
+      where: { guildId: guildId },
+    })
+    const guild = await this.getGuild(guildId)
+    const guildChannels = await guild.channels.fetch()
+    const unavailableChannels = dbChannels.filter(
+      (channel) => !guildChannels.some((c) => c.id === channel.channelId)
+    )
+    await Promise.all(
+      unavailableChannels.map(async (channel) => {
+        await this.prisma.publicChannel.delete({
+          where: {
+            channelId_guildId: {
+              channelId: channel.channelId,
+              guildId: guildId,
+            },
+          },
+        })
+      })
+    )
   }
 }

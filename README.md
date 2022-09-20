@@ -21,17 +21,17 @@ Normally, everyone in the Discord server would not be able to see any channel th
 
 ## Basic Commands
 
-- [x] `/channel invite <user|role>` - Invite a user or a role to the channel. The invited user would able to read and write messages in the channel, the default notification is `All messages`
-- [x] `/channel leave <channel>` - Leave the channel you are in
-- [x] `/channel kick <channel> <user>` - Kick the user from the channel. The users would not be able to read or write messages in the channel anymore
-- [x] `/channel archive <channel>` - Archive the channel, the users in the channel are only able to read the messages
+- [ ] `/channel invite <user|role>` - Invite a user or a role to the channel. The invited user would able to read and write messages in the channel, the default notification is `All messages`
+- [ ] `/channel leave <channel>` - Leave the channel you are in
+- [ ] `/channel kick <channel> <user>` - Kick the user from the channel. The users would not be able to read or write messages in the channel anymore
+- [ ] `/channel archive <channel>` - Archive the channel, the users in the channel are only able to read the messages
 - [ ] `/channel delete <channel>` - Delete the channel
 
 ## Available Commands for Public Channel
 
 - [x] `/channel-public create <channel-name> <category-name>?` - Create a public channel
-- [x] `/channel-public seek <channel>` - Join into the channel with read-only mode, the default notification is `Only @mention`
-- [x] `/channel-public join <channel>` - Join into the channel with read-write mode, the default notification is `All messages`
+- [ ] `/channel-public seek <channel>` - Join into the channel with read-only mode, the default notification is `Only @mention`
+- [ ] `/channel-public join <channel>` - Join into the channel with read-write mode, the default notification is `All messages`
 - [x] `/channel-public list` - List all available public channels
 
 ## Available Commands for Private Channel

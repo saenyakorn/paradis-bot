@@ -17,10 +17,11 @@ export class DiscordConfigService implements DiscordOptionsFactory {
     const guilds = await this.prisma.guild.findMany({ select: { id: true } })
     const discordConfig = this.configService.get<IConfiguration['discord']>('discord')
 
-    this.logger.log(`Registering ${guilds.length} guilds`)
+    this.logger.log(`Registering ${guilds.length} guilds...`)
 
     const registerCommandOptions: RegisterCommandOptions[] = guilds.map((guild) => ({
       forGuild: guild.id,
+      removeCommandsBefore: true,
     }))
 
     return {
