@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 
 import { ChannelService } from '@app/api/channel/channel.service'
-import { PrismaService } from '@app/prisma/prisma.service'
+import { NotificationService } from '@app/api/notification/notification.service'
 import { InjectDiscordClient, On, Once } from '@discord-nestjs/core'
 import { Channel, ChannelType, Client } from 'discord.js'
 
@@ -12,12 +12,14 @@ export class BotGateway {
   constructor(
     @InjectDiscordClient()
     private readonly client: Client,
-    private readonly channelService: ChannelService
+    private readonly channelService: ChannelService,
+    private readonly notificationService: NotificationService
   ) {}
 
   @Once('ready')
   onReady() {
     this.logger.log(`Bot ${this.client.user.tag} was started!`)
+    // TODO load notifications into memory from database
   }
 
   @On('channelDelete')
