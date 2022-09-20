@@ -10,25 +10,43 @@ export class MentionService {
     private readonly client: Client
   ) {}
 
-  getUserFromMention(mention: string | undefined) {
-    if (mention?.startsWith('<@') && mention?.endsWith('>')) {
+  isUser(mention: string) {
+    return mention.startsWith('<@') && mention?.endsWith('>')
+  }
+  isRole(mention: string) {
+    return mention.startsWith('<@&') && mention?.endsWith('>')
+  }
+  isChannel(mention: string) {
+    return mention.startsWith('<#') && mention?.endsWith('>')
+  }
+
+  getUserFromMention(mention: string) {
+    if (this.isUser(mention)) {
       mention = mention.slice(2, -1)
       if (mention.startsWith('!')) mention = mention.slice(1)
       return this.client.users.cache.get(mention)
     }
   }
-
-  getChannelFromMention(mention: string | undefined) {
-    if (mention?.startsWith('<#') && mention?.endsWith('>')) {
+  getChannelFromMention(mention: string) {
+    if (this.isChannel(mention)) {
       mention = mention.slice(2, -1)
       return this.client.channels.cache.get(mention)
     }
   }
-
-  getRoleFromMention(mention: string | undefined) {
-    if (mention?.startsWith('<@&') && mention?.endsWith('>')) {
+  getRoleFromMention(mention: string) {
+    if (this.isRole(mention)) {
       mention = mention.slice(3, -1)
       return this.client.guilds.cache.get(mention)
+    }
+  }
+
+  getMentionId(mention: string) {
+    if (this.isUser(mention)) {
+      return this.getUserFromMention(mention)?.id
+    } else if (this.isChannel(mention)) {
+      return this.getChannelFromMention(mention)?.id
+    } else if (this.isRole(mention)) {
+      return this.getRoleFromMention(mention)?.id
     }
   }
 

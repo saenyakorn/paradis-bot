@@ -66,7 +66,7 @@ export class ChannelService {
    * @param categoryName - The category name
    * @returns
    */
-  async _findOrCreateCategory(guildId: string, categoryName: string) {
+  private async _findOrCreateCategory(guildId: string, categoryName: string) {
     const guild = await this.getGuild(guildId)
     // Find the existing category
     const existingCategory = guild.channels.cache.find(
@@ -80,7 +80,7 @@ export class ChannelService {
     })
   }
 
-  async _createPublicChannelInDB(guildId: string, channelId: string) {
+  private async _createPublicChannelInDB(guildId: string, channelId: string) {
     const result = await this.prisma.publicChannel.aggregate({
       _max: { number: true },
     })
@@ -125,7 +125,7 @@ export class ChannelService {
     if (visibility === ChannelVisibility.Public) {
       await this._createPublicChannelInDB(guildId, channel.id)
     }
-    await channel.send(`Welcome to ${channel.name}!`)
+
     return channel
   }
 
@@ -136,12 +136,11 @@ export class ChannelService {
    * @param userId - The user id to invite
    * @param inviter - The inviter user id
    */
-  async inviteUserToChannel(guildId: string, channelId: string, userId: string, inviter: string) {
+  async inviteToChannel(params: { guildId: string; channelId: string; mentionId: string }) {
+    const { guildId, channelId, mentionId } = params
     const channel = await this.findTextChannel(guildId, channelId)
-    await channel.permissionOverwrites.create(userId, { ViewChannel: true })
-    const userMention = this.mentionService.createUserMention(userId)
-    const inviterMention = this.mentionService.createUserMention(inviter)
-    await channel.send(`${userMention} has been invited to this channel by ${inviterMention}`)
+    await channel.permissionOverwrites.create(mentionId, { ViewChannel: true })
+    return channel
   }
 
   /**
@@ -198,12 +197,11 @@ export class ChannelService {
       deleteInGuild?: boolean
     }
   ) {
-    await this.prisma.publicChannel.delete({
+    // Skip if the channel is not found
+    await this.prisma.publicChannel.deleteMany({
       where: {
-        channelId_guildId: {
-          channelId: channelId,
-          guildId: guildId,
-        },
+        channelId,
+        guildId,
       },
     })
     if (options?.deleteInGuild) {
@@ -274,7 +272,7 @@ export class ChannelService {
     })
   }
 
-  async _cleanupDatabasePublicChannel(guildId: string) {
+  private async _cleanupDatabasePublicChannel(guildId: string) {
     const dbChannels = await this.prisma.publicChannel.findMany({
       where: { guildId: guildId },
     })

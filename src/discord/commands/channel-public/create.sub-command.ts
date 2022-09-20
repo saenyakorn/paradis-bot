@@ -54,10 +54,10 @@ export class ChannelPublicCreateSubCommand
         channelName,
         categoryName,
       })
+      const channelMention = this.mentionService.createChannelMention(createdChannel.id)
+      await createdChannel.send(`Welcome to ${channelMention}!`)
       return {
-        content: `We created a channel ${this.mentionService.createChannelMention(
-          createdChannel.id
-        )} for you! ⭐️`,
+        content: `We created a channel ${channelMention} for you! ⭐️`,
         ephemeral: true,
       }
     } catch (err) {

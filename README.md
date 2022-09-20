@@ -21,11 +21,11 @@ Normally, everyone in the Discord server would not be able to see any channel th
 
 ## Basic Commands
 
-- [ ] `/channel invite <user|role>` - Invite a user or a role to the channel. The invited user would able to read and write messages in the channel, the default notification is `All messages`
-- [ ] `/channel leave <channel>` - Leave the channel you are in
-- [ ] `/channel kick <channel> <user>` - Kick the user from the channel. The users would not be able to read or write messages in the channel anymore
-- [ ] `/channel archive <channel>` - Archive the channel, the users in the channel are only able to read the messages
-- [ ] `/channel delete <channel>` - Delete the channel
+- [x] `/channel invite <user|role>` - Invite a user or a role to the channel. The invited user would able to read and write messages in the channel, the default notification is `All messages`
+- [x] `/channel leave` - Leave the channel you are in
+- [x] `/channel kick <user>` - Kick the user from the channel. The users would not be able to read or write messages in the channel anymore
+- [ ] `/channel archive` - Archive the channel, the users in the channel are only able to read the messages
+- [x] `/channel delete` - Delete the channel
 
 ## Available Commands for Public Channel
 

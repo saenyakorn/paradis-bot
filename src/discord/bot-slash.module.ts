@@ -9,6 +9,7 @@ import {
   ChannelPublicCommand,
   channelPublicSubCommands,
 } from './commands/channel-public/channel-public.command'
+import { ChannelCommand, channelSubCommands } from './commands/channel/channel.command'
 import { PingCommand } from './commands/ping/ping.command'
 
 @Module({
@@ -16,7 +17,10 @@ import { PingCommand } from './commands/ping/ping.command'
   providers: [
     ReflectMetadataProvider,
     PingCommand,
-    /** Public Channel subcommand */
+    /** Common Channel Command */
+    ChannelCommand,
+    ...channelSubCommands,
+    /** Public Channel Command */
     ChannelPublicCommand,
     ...channelPublicSubCommands,
   ],
