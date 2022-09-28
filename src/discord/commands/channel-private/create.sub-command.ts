@@ -14,7 +14,7 @@ import {
 } from '@discord-nestjs/core'
 import { InteractionReplyOptions } from 'discord.js'
 
-class ChannelPublicCreateSubCommandDTO {
+class ChannelPrivateCreateSubCommandDTO {
   @Param({ name: 'channel-name', description: 'channel name', required: true })
   channelName: string
 
@@ -24,14 +24,14 @@ class ChannelPublicCreateSubCommandDTO {
 
 @SubCommand({
   name: 'create',
-  description: 'Create public text channel',
+  description: 'Create private text channel',
 })
 @UsePipes(TransformPipe)
 @Injectable()
-export class ChannelPublicCreateSubCommand
-  implements DiscordTransformedCommand<ChannelPublicCreateSubCommandDTO>
+export class ChannelPrivateCreateSubCommand
+  implements DiscordTransformedCommand<ChannelPrivateCreateSubCommandDTO>
 {
-  private readonly logger = new Logger(ChannelPublicCreateSubCommand.name)
+  private readonly logger = new Logger(ChannelPrivateCreateSubCommand.name)
 
   constructor(
     private readonly channelService: ChannelService,
@@ -39,25 +39,25 @@ export class ChannelPublicCreateSubCommand
   ) {}
 
   async handler(
-    @Payload() dto: ChannelPublicCreateSubCommandDTO,
+    @Payload() dto: ChannelPrivateCreateSubCommandDTO,
     { interaction }: TransformedCommandExecutionContext
   ): Promise<InteractionReplyOptions> {
-    this.logger.log(`Performing "channel public create" sub-command... with ${dto}`)
+    this.logger.log(`Performing "channel private create" sub-command... with ${dto}`)
     const guildId = interaction.guildId
     const creatorId = interaction.user.id
     const { channelName, categoryName } = dto
 
     const createdChannel = await this.channelService.createTextChannel({
-      visibility: ChannelVisibility.Public,
+      visibility: ChannelVisibility.Private,
       guildId,
       creatorId,
       channelName,
       categoryName,
     })
     const channelMention = this.mentionService.createChannelMention(createdChannel.id)
-    await createdChannel.send(`Welcome to public text channel, ${channelMention}!`)
+    await createdChannel.send(`Welcome to private text channel, ${channelMention}!`)
     return {
-      content: `We created a public text channel ${channelMention} for you! ⭐️`,
+      content: `We created a private text channel ${channelMention} for you! ⭐️`,
       ephemeral: true,
     }
   }

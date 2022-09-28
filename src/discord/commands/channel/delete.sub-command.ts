@@ -19,7 +19,7 @@ export class ChannelDeleteSubCommand implements DiscordCommand {
 
     const { guildId, channelId } = interaction
     try {
-      await this.channelService.deleteChannel(guildId, channelId, { deleteInGuild: true })
+      await this.channelService.deleteTextChannel(guildId, channelId, { deleteInGuild: true })
     } catch (err) {
       this.logger.error(err)
       return {

@@ -9,6 +9,7 @@ import {
   OverwriteResolvable,
   PermissionFlagsBits,
   TextChannel,
+  VoiceChannel,
 } from 'discord.js'
 
 import { MentionService } from '../mention/mention.service'
@@ -60,6 +61,16 @@ export class ChannelService {
     return this.findTextChannel(guildId, channel.channelId)
   }
 
+  async getVoiceChannel(guildId: string, channelId: string) {
+    const result = await this.prisma.voiceChannel.findUnique({
+      where: {
+        channelId_guildId: { channelId, guildId },
+      },
+    })
+    const channel = await this.client.channels.fetch(channelId)
+    return { channel, temporary: result?.temporary ?? false }
+  }
+
   /**
    * Find or create a category
    * @param guildId - The guild id
@@ -96,7 +107,7 @@ export class ChannelService {
    * @param visibility - The channel visibility, public or private
    * @returns
    */
-  async createChannel(params: {
+  async createTextChannel(params: {
     visibility: ChannelVisibility
     guildId: string
     channelName: string
@@ -190,7 +201,7 @@ export class ChannelService {
    * @param guildId - The guild id
    * @param channelId - The channel id
    */
-  async deleteChannel(
+  async deleteTextChannel(
     guildId: string,
     channelId: string,
     options?: {
@@ -272,6 +283,68 @@ export class ChannelService {
     })
   }
 
+  /**
+   * Create a voice channel
+   * @param params - The params
+   * @returns
+   */
+  async createVoiceChannel(params: {
+    guildId: string
+    channelName: string
+    categoryName?: string
+    temporary?: boolean
+  }) {
+    const { guildId, channelName, categoryName, temporary } = params
+    const guild = await this.getGuild(guildId)
+    // Create voice channel
+    const channel = await guild.channels.create({
+      name: channelName,
+      type: ChannelType.GuildVoice,
+    })
+    // Create category if needed
+    if (categoryName) {
+      const category = await this._findOrCreateCategory(guildId, categoryName)
+      await channel.setParent(category.id)
+    }
+    // Store channel id to database
+    await this.prisma.voiceChannel.create({
+      data: { channelId: channel.id, guildId, temporary },
+    })
+    return channel
+  }
+
+  /**
+   * Delete a voice channel
+   * @param guildId - The guild id
+   * @param channelId - The voice channel id
+   */
+  async deleteVoiceChannel(guildId: string, channelId: string) {
+    const { channel } = await this.getVoiceChannel(guildId, channelId)
+    await channel.delete()
+    await this.prisma.voiceChannel.delete({
+      where: { channelId_guildId: { channelId, guildId } },
+    })
+  }
+
+  /**
+   * Move the user to the given voice channel
+   * @param guildId - The guild id
+   * @param channelId - The channel id
+   * @param userId - The user id
+   */
+  async moveUserToVoiceChannel(guildId: string, channelId: string, userId: string) {
+    const guild = await this.getGuild(guildId)
+    const channel = await guild.channels.fetch(channelId)
+    if (channel instanceof VoiceChannel) {
+      const user = await guild.members.fetch(userId)
+      await user.voice.setChannel(channel)
+    }
+  }
+
+  /**
+   * Clear the non-exist public channel in the database
+   * @param guildId - The guild id
+   */
   private async _cleanupDatabasePublicChannel(guildId: string) {
     const dbChannels = await this.prisma.publicChannel.findMany({
       where: { guildId: guildId },

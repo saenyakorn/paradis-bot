@@ -27,7 +27,11 @@ export class DiscordConfigService implements DiscordOptionsFactory {
     return {
       token: discordConfig.token,
       discordClientOptions: {
-        intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+        intents: [
+          GatewayIntentBits.Guilds,
+          GatewayIntentBits.GuildMessages,
+          GatewayIntentBits.GuildVoiceStates,
+        ],
       },
       registerCommandOptions,
     }
