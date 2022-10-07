@@ -45,7 +45,7 @@ export class ChannelVoiceSetupSubCommand
     const { channelName, categoryName } = dto
     const channel = await this.channelService.createVoiceChannel({
       guildId,
-      channelName,
+      channelName: `+ ${channelName}`,
       categoryName,
     })
     const mention = this.mentionService.createChannelMention(channel.id)

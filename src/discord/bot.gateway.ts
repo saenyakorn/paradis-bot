@@ -35,32 +35,55 @@ export class BotGateway {
 
   @On('voiceStateUpdate')
   async onVoiceStateUpdate(oldState: VoiceState, newState: VoiceState) {
-    console.log('Someone joined a voice channel')
-    console.log(oldState, newState)
-    const targetVc = await this.channelService.getVoiceChannel(
-      newState.guild.id,
-      newState.channelId
-    )
-    if (!targetVc) return
-    // If user is not in the temporary voice channel anymore
-    const oldVc = await this.channelService.getVoiceChannel(oldState.guild.id, oldState.channelId)
-    if (oldVc.temporary) {
-      const members = oldState.channel.members
-      if (members.size === 0) {
-        await this.channelService.deleteVoiceChannel(oldState.guild.id, oldState.channelId)
+    // user join the voice channel
+    if (newState.channelId && !oldState.channelId) {
+      const voiceChannel = await this.channelService.getVoiceChannel(
+        newState.guild.id,
+        newState.channelId
+      )
+
+      // user join the special voice channel
+      if (!voiceChannel.temporary) {
+        const guildId = newState.guild.id
+        const username = newState.member.user.username
+        const userId = newState.member.user.id
+
+        const channel = await this.channelService.createVoiceChannel({
+          guildId: guildId,
+          channelName: `${username}'s channel`,
+          temporary: true,
+        })
+        // Move user to the temporary channel
+        await this.channelService.moveUserToVoiceChannel(guildId, channel.id, userId)
+        return
       }
-      return
+
+      // user join the temporary voice channel
+      if (voiceChannel.temporary) {
+        return
+      }
     }
-    // If user is entering the special voice channel, create a new temporary voice channel
-    const guildId = newState.guild.id
-    const username = newState.member.user.username
-    const userId = newState.member.user.id
-    const channel = await this.channelService.createVoiceChannel({
-      guildId: guildId,
-      channelName: `${username} channel`,
-      temporary: true,
-    })
-    // Move user to the temporary channel
-    await this.channelService.moveUserToVoiceChannel(guildId, channel.id, userId)
+
+    // user leave the voice channel
+    if (!newState.channelId && oldState.channelId) {
+      const voiceChannel = await this.channelService.getVoiceChannel(
+        oldState.guild.id,
+        oldState.channelId
+      )
+
+      // user leave the special voice channel
+      if (!voiceChannel.temporary) {
+        return
+      }
+
+      // user leave the temporary voice channel
+      if (voiceChannel.temporary) {
+        const members = oldState.channel.members
+        if (members.size === 0) {
+          await this.channelService.deleteVoiceChannel(oldState.guild.id, oldState.channelId)
+        }
+        return
+      }
+    }
   }
 }

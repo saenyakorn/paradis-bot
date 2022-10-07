@@ -30,7 +30,7 @@ export class ChannelService {
     const guild = await this.client.guilds.fetch(guildId)
     if (!guild) {
       this.logger.debug(`Guild ${guildId} not found`)
-      throw new Error(`Guild ${guildId}  not found`)
+      throw new Error(`Guild ${guildId} not found`)
     }
     return guild
   }
@@ -62,10 +62,11 @@ export class ChannelService {
   }
 
   async getVoiceChannel(guildId: string, channelId: string) {
+    if (!channelId || !guildId) {
+      return null
+    }
     const result = await this.prisma.voiceChannel.findUnique({
-      where: {
-        channelId_guildId: { channelId, guildId },
-      },
+      where: { channelId_guildId: { channelId, guildId } },
     })
     const channel = await this.client.channels.fetch(channelId)
     return { channel, temporary: result?.temporary ?? false }
@@ -97,7 +98,13 @@ export class ChannelService {
     })
     const maxNumber = result._max?.number + 1 ?? 0
     await this.prisma.publicChannel.create({
-      data: { guildId: guildId, channelId: channelId, number: maxNumber },
+      data: {
+        channelId: channelId,
+        number: maxNumber,
+        guild: {
+          connectOrCreate: { where: { id: guildId }, create: { id: guildId } },
+        },
+      },
     })
   }
 
@@ -308,7 +315,13 @@ export class ChannelService {
     }
     // Store channel id to database
     await this.prisma.voiceChannel.create({
-      data: { channelId: channel.id, guildId, temporary },
+      data: {
+        channelId: channel.id,
+        temporary,
+        guild: {
+          connectOrCreate: { where: { id: guildId }, create: { id: guildId } },
+        },
+      },
     })
     return channel
   }
