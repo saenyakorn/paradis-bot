@@ -1,6 +1,6 @@
 # Paradis Bot <!-- omit in toc -->
 
-Slack-like Discord bot for collaborative working
+Self-hosted Slack-like Discord bot for collaborative working on Discord
 
 # Table of Contents <!-- omit in toc -->
 
@@ -11,6 +11,8 @@ Slack-like Discord bot for collaborative working
   - [Available Commands for Private Channel](#available-commands-for-private-channel)
   - [Available Commands for Voice Channel](#available-commands-for-voice-channel)
   - [Notification Management](#notification-management)
+- [Development](#development)
+- [Hosting](#hosting)
 
 # Features
 
@@ -46,3 +48,19 @@ Normally, everyone in the Discord server would not be able to see any channel th
 - [ ] `/noti list` - List all notification setting for every channel you are in
 - [ ] `/noti set <notification> <channel>?` - Set the notification for the current or given channel
 - [ ] `/noti pause <date|time> <channel>?` - Pause the notification util the given time, users will not receive any notification during the time
+
+# Development
+
+For local development, you need to follow this instructions.
+
+1. Enter [Discord Developer Portal](https://discord.com/developers/applications) and create discord application
+2. Enter `Bot` section and create a bot
+3. Click `Reset Token` to get `DISCORD_TOKEN` as a secret
+4. Enter `OAuth2` > `General` section, you will get the `DISCORD_CLIENT_ID` and `DISCORD_CLIENT_SECRET`
+5. In this project, you need to create `.env` file from `.env.template` and fill in the secrets
+6. Run `docker compose up -d` to create a PostgreSQL database
+7. Run `yarn start:dev` to start the application, the application will run on [localhost:3000](http://localhost:3000) by default
+
+# Hosting
+
+This repositoty allow you to host this bot by your own. Basically, it's a [NestJS](https://nestjs.com/) application, I will add more information later.
