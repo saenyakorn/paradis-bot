@@ -69,7 +69,11 @@ export class ChannelService {
       where: { channelId_guildId: { channelId, guildId } },
     })
     const channel = await this.client.channels.fetch(channelId)
-    return { channel, temporary: result?.temporary ?? false }
+    return {
+      channel,
+      creatorId: result?.creatorId,
+      temporary: result?.temporary ?? false,
+    }
   }
 
   /**
@@ -101,7 +105,7 @@ export class ChannelService {
       data: {
         channelId: channelId,
         number: maxNumber,
-        guild: {
+        Guild: {
           connectOrCreate: { where: { id: guildId }, create: { id: guildId } },
         },
       },
@@ -204,7 +208,7 @@ export class ChannelService {
   }
 
   /**
-   * Delete a channel
+   * Delete a text channel
    * @param guildId - The guild id
    * @param channelId - The channel id
    */
@@ -298,10 +302,11 @@ export class ChannelService {
   async createVoiceChannel(params: {
     guildId: string
     channelName: string
+    creatorId: string
     categoryName?: string
     temporary?: boolean
   }) {
-    const { guildId, channelName, categoryName, temporary } = params
+    const { guildId, channelName, creatorId, categoryName, temporary } = params
     const guild = await this.getGuild(guildId)
     // Create voice channel
     const channel = await guild.channels.create({
@@ -318,9 +323,30 @@ export class ChannelService {
       data: {
         channelId: channel.id,
         temporary,
-        guild: {
+        Creator: {
+          connectOrCreate: { where: { id: creatorId }, create: { id: creatorId } },
+        },
+        Guild: {
           connectOrCreate: { where: { id: guildId }, create: { id: guildId } },
         },
+      },
+    })
+    return channel
+  }
+
+  /**
+   * Create a voice channel
+   * @param params - The params
+   * @returns
+   */
+  async findOwnTemporaryVoiceChannel(guildId: string, creatorId: string) {
+    const guild = await this.getGuild(guildId)
+    // Store channel id to database
+    const channel = await this.prisma.voiceChannel.findFirst({
+      where: {
+        guildId: guild.id,
+        temporary: true,
+        creatorId: creatorId,
       },
     })
     return channel

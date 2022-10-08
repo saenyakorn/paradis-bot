@@ -7,7 +7,7 @@ import { ChannelDeleteSubCommand } from './delete.sub-command'
 import { ChannelInviteSubCommand } from './invite.sub-command'
 import { ChannelKickSubCommand } from './kick.sub-command'
 import { ChannelLeaveSubCommand } from './leave.sub-command'
-import { ChannelVoiceSetupSubCommand } from './voice.sub-command'
+import { ChannelVoiceSetupSubCommand } from './voice-setup.sub-command'
 
 export const channelSubCommands = [
   ChannelArchieveSubCommand,

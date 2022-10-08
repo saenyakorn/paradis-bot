@@ -22,57 +22,79 @@ export class BotGateway {
 
   @On('channelDelete')
   async onChannelDelete(channel: Channel) {
-    if (channel.type !== ChannelType.GuildText) return
-    const guildId = channel.guildId
+    if (channel.type === ChannelType.DM) return
     const channelId = channel.id
     try {
-      await this.channelService.deleteTextChannel(guildId, channelId)
-      this.logger.log(`Deleted ${channel.name} from database`)
+      if (channel.type === ChannelType.GuildText) {
+        await this.channelService.deleteTextChannel(channel.guildId, channelId)
+        this.logger.log(`Deleted text channel ${channel.name} from database`)
+        return
+      }
+      if (channel.type === ChannelType.GuildVoice) {
+        await this.channelService.deleteVoiceChannel(channel.guildId, channelId)
+        this.logger.log(`Deleted voice channel ${channel.name} from database`)
+        return
+      }
     } catch (err) {
-      this.logger.log(`Text channel ${channel.name} doesn't exist in database`)
+      this.logger.log(`A channel ${channel.name} doesn't exist in database`)
     }
   }
 
   @On('voiceStateUpdate')
   async onVoiceStateUpdate(oldState: VoiceState, newState: VoiceState) {
-    // user join the voice channel
-    if (newState.channelId && !oldState.channelId) {
-      const voiceChannel = await this.channelService.getVoiceChannel(
-        newState.guild.id,
-        newState.channelId
-      )
+    const [oldVoiceChannel, newVoiceChannel] = await Promise.all([
+      this.channelService.getVoiceChannel(oldState.guild.id, oldState.channelId),
+      this.channelService.getVoiceChannel(newState.guild.id, newState.channelId),
+    ])
 
+    // user join the voice channel or change the voice channel
+    if (newVoiceChannel) {
       // user join the special voice channel
-      if (!voiceChannel.temporary) {
+      if (!newVoiceChannel.temporary) {
         const guildId = newState.guild.id
         const username = newState.member.user.username
         const userId = newState.member.user.id
 
-        const channel = await this.channelService.createVoiceChannel({
+        const ownTemporaryChannel = await this.channelService.findOwnTemporaryVoiceChannel(
+          guildId,
+          userId
+        )
+
+        if (ownTemporaryChannel) {
+          await this.channelService.moveUserToVoiceChannel(
+            guildId,
+            ownTemporaryChannel.channelId,
+            userId
+          )
+          return
+        }
+
+        const temporaryChannel = await this.channelService.createVoiceChannel({
           guildId: guildId,
           channelName: `${username}'s channel`,
+          creatorId: userId,
           temporary: true,
         })
         // Move user to the temporary channel
-        await this.channelService.moveUserToVoiceChannel(guildId, channel.id, userId)
+        await this.channelService.moveUserToVoiceChannel(guildId, temporaryChannel.id, userId)
         return
       }
 
       // user join the temporary voice channel
-      if (voiceChannel.temporary) {
+      if (newVoiceChannel.temporary) {
         return
       }
     }
 
     // user leave the voice channel
-    if (!newState.channelId && oldState.channelId) {
+    if (!newVoiceChannel && oldVoiceChannel) {
       const voiceChannel = await this.channelService.getVoiceChannel(
         oldState.guild.id,
         oldState.channelId
       )
 
       // user leave the special voice channel
-      if (!voiceChannel.temporary) {
+      if (!voiceChannel?.temporary) {
         return
       }
 

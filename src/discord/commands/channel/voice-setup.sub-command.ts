@@ -45,6 +45,7 @@ export class ChannelVoiceSetupSubCommand
     const { channelName, categoryName } = dto
     const channel = await this.channelService.createVoiceChannel({
       guildId,
+      creatorId: interaction.user.id,
       channelName: `+ ${channelName}`,
       categoryName,
     })

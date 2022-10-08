@@ -20,13 +20,14 @@ model Guild {
 model User {
   id                String              @id
   NotificationPause NotificationPause[]
+  VoiceChannel      VoiceChannel[]
 }
 
 model PublicChannel {
   channelId String
 
   guildId String
-  guild   Guild  @relation(fields: [guildId], references: [id])
+  Guild   Guild  @relation(fields: [guildId], references: [id])
 
   number Int
 
@@ -37,7 +38,10 @@ model VoiceChannel {
   channelId String
 
   guildId String
-  guild   Guild  @relation(fields: [guildId], references: [id])
+  Guild   Guild  @relation(fields: [guildId], references: [id])
+
+  creatorId String
+  Creator   User   @relation(fields: [creatorId], references: [id])
 
   temporary Boolean @default(false)
 
@@ -46,10 +50,10 @@ model VoiceChannel {
 
 model NotificationPause {
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  User   User   @relation(fields: [userId], references: [id])
 
   guildId String
-  guild   Guild  @relation(fields: [guildId], references: [id])
+  Guild   Guild  @relation(fields: [guildId], references: [id])
 
   endDate   DateTime
   channelId String?
