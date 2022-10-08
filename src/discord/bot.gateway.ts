@@ -102,7 +102,9 @@ export class BotGateway {
       if (voiceChannel.temporary) {
         const members = oldState.channel.members
         if (members.size === 0) {
-          await this.channelService.deleteVoiceChannel(oldState.guild.id, oldState.channelId)
+          await this.channelService.deleteVoiceChannel(oldState.guild.id, oldState.channelId, {
+            deleteInGuild: true,
+          })
         }
         return
       }
