@@ -357,9 +357,17 @@ export class ChannelService {
    * @param guildId - The guild id
    * @param channelId - The voice channel id
    */
-  async deleteVoiceChannel(guildId: string, channelId: string) {
-    const { channel } = await this.getVoiceChannel(guildId, channelId)
-    await channel.delete()
+  async deleteVoiceChannel(
+    guildId: string,
+    channelId: string,
+    options?: {
+      deleteInGuild?: boolean
+    }
+  ) {
+    if (options?.deleteInGuild) {
+      const { channel } = await this.getVoiceChannel(guildId, channelId)
+      await channel.delete()
+    }
     await this.prisma.voiceChannel.delete({
       where: { channelId_guildId: { channelId, guildId } },
     })
