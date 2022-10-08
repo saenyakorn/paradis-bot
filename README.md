@@ -39,7 +39,7 @@ Normally, everyone in the Discord server would not be able to see any channel th
 
 ## Available Commands for Voice Channel
 
-- [ ] `/channel voice-setup <channel-name> <category>?` - Setup a voice channel. When the user enter this voice channel, the bot will create another temporary voice channel and move the user into the new channel. The bot will delete the channel when the all users leave the temporary channel
+- [x] `/channel voice-setup <channel-name> <category>?` - Setup a voice channel. When the user enter this voice channel, the bot will create another temporary voice channel and move the user into the new channel. The bot will delete the channel when the all users leave the temporary channel
 
 ## Notification Management
 
