@@ -45,6 +45,8 @@ Normally, everyone in the Discord server would not be able to see any channel th
 
 ## Notification Management
 
+> Note: For now, discord API does not support notification management.
+
 - [ ] `/noti list` - List all notification setting for every channel you are in
 - [ ] `/noti set <notification> <channel>?` - Set the notification for the current or given channel
 - [ ] `/noti pause <date|time> <channel>?` - Pause the notification util the given time, users will not receive any notification during the time
@@ -63,4 +65,41 @@ For local development, you need to follow this instructions.
 
 # Hosting
 
-This repositoty allow you to host this bot by your own. Basically, it's a [NestJS](https://nestjs.com/) application, I will add more information later.
+This repositoty allow you to host this bot by your own. Basically, it's a [NestJS](https://nestjs.com/) application.
+
+If you are familiar with [Docker](https://www.docker.com/), you can use the following `docker-compose` file here to run the application.
+
+```yaml
+version: '3.9'
+
+services:
+  paradis-bot:
+    image: ghcr.io/saenyakorn/paradis-bot:1.0.0
+    container_name: paradis-bot
+    # restart: unless-stopped
+    environment:
+      DISCORD_TOKEN: <secret>
+      DISCORD_CLIENT_ID: <client-id>
+      DISCORD_CLIENT_SECRET: <secret>
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/paradis-bot
+      APP_PORT: 3000
+      APP_GLOBAL_PREFIX: api # Now, you can test the simple REST API on http://localhost:3000/api
+    depends_on:
+      - postgres
+    ports:
+      - 3000:3000
+  postgres:
+    image: postgres:14
+    restart: unless-stopped
+    container_name: postgres
+    environment:
+      POSTGRES_DB: paradis-bot
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+```
+
+Then, invite the bot to your server by using the following URL. And try to run the simplest command `/ping` on discord text input.
